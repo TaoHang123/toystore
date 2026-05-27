@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}我的订单{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>我的订单</h1>
+
+    {% if orders %}
+        <table class="order-table">
+            <thead>
+                <tr>
+                    <th>订单号</th>
+                    <th>下单时间</th>
+                    <th>订单状态</th>
+                    <th>总金额</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.date|date:"Y-m-d H:i:s" }}</td>
+                    <td>{{ order.get_status_display }}</td>
+                    <td>¥ {{ order.total_amount|floatformat:2 }}</td>
+                    <td><a href="{% url 'shop:order_detail' order.id %}">查看详情</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5">暂无订单</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>暂无订单，去<a href="{% url 'shop:index' %}">逛逛商品</a>吧。</p>
+    {% endif %}
+</div>
+{% endblock %}

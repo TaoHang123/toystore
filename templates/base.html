@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}玩具经销商{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background-color: #f8f9fa;
+        }
+        /* 顶部导航栏 */
+        .navbar {
+            background-color: #2c3e50;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            flex-wrap: wrap;
+        }
+        .navbar .logo a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+        .navbar .user-info {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        .navbar .user-info a, .navbar .user-info button {
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            text-decoration: none;
+        }
+        .navbar .user-info a:hover, .navbar .user-info button:hover {
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 0.8rem;
+            border-top: 1px solid #e9ecef;
+            margin-top: 40px;
+        }
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <a href="{% url 'shop:index' %}">🎁 玩具经销商</a>
+        </div>
+        <div class="user-info">
+            <a href="{% url 'shop:cart_detail' %}">🛒 购物车</a>
+            {% if user.is_authenticated %}
+                <span>欢迎, {{ user.username }}</span>
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <button type="submit">登出</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">登录</a>
+                <a href="{% url 'register' %}">注册</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <footer>
+        &copy; 2025 玩具经销商 | 快乐童年，从这里开始
+    </footer>
+</body>
+</html>

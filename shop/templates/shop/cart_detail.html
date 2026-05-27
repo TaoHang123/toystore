@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>购物车</h1>
+<table class="table">
+    <thead>
+        <tr><th>选择</th><th>商品</th><th>单价</th><th>数量</th><th>小计</th><th>操作</th></tr>
+    </thead>
+    <tbody>
+        {% for item in cart_items %}
+        <tr data-price="{{ item.product.prod_price }}" data-quantity="{{ item.quantity }}">
+            <td><input type="checkbox" name="selected_items" value="{{ item.id }}" class="item-checkbox"></td>
+            <td>{{ item.product.prod_name }}</td>
+            <td class="item-price">{{ item.product.prod_price }}</td>
+            <td class="item-quantity">
+            <form action="{% url 'shop:update_cart' item.id %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" style="width:60px;">
+                <button type="submit">更新</button>
+            </form>
+            </td>
+            <td class="item-subtotal">{{ item.product.prod_price|floatformat:2 }} × {{ item.quantity }}</td>
+            <td><a href="{% url 'shop:remove_from_cart' item.id %}">删除</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="total-area">
+    <p>选中商品总价：<span id="selected-total">0.00</span></p>
+</div>
+
+<div>
+    <label><input type="checkbox" id="select-all"> 全选</label>
+</div>
+
+<form id="checkout-form" action="{% url 'shop:checkout_preview' %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="selected_ids" id="selected-ids-input" value="">
+    <button type="submit" id="checkout-btn">结算选中商品</button>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectAllCheckbox = document.getElementById('select-all');
+        const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+        const selectedTotalSpan = document.getElementById('selected-total');
+
+        // 更新选中商品总价
+        function updateSelectedTotal() {
+            let total = 0;
+            itemCheckboxes.forEach(cb => {
+                if (cb.checked) {
+                    const row = cb.closest('tr');
+                    // 获取单价
+                    const priceCell = row.querySelector('.item-price');
+                    const price = priceCell ? parseFloat(priceCell.innerText) : 0;
+                    // 获取数量：注意数量输入框在表单内，通过 name 属性查找
+                    const quantityInput = row.querySelector('input[name="quantity"]');
+                    const quantity = quantityInput ? parseInt(quantityInput.value) : 0;
+                    if (!isNaN(price) && !isNaN(quantity)) {
+                        total += price * quantity;
+                    }
+                }
+            });
+            if (selectedTotalSpan) selectedTotalSpan.innerText = total.toFixed(2);
+        }
+
+        // 单个复选框变化时更新总价和全选状态
+        function onItemCheckboxChange() {
+            const allChecked = Array.from(itemCheckboxes).every(cb => cb.checked);
+            if (selectAllCheckbox) selectAllCheckbox.checked = allChecked;
+            updateSelectedTotal();
+        }
+
+        // 绑定复选框事件
+        itemCheckboxes.forEach(cb => {
+            cb.addEventListener('change', onItemCheckboxChange);
+        });
+
+        // 全选/全不选
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', function() {
+                const isChecked = selectAllCheckbox.checked;
+                itemCheckboxes.forEach(cb => cb.checked = isChecked);
+                updateSelectedTotal();
+            });
+        }
+
+        // 结算按钮：收集选中ID
+        const checkoutBtn = document.getElementById('checkout-btn');
+        if (checkoutBtn) {
+            checkoutBtn.addEventListener('click', function(e) {
+                const selected = [];
+                itemCheckboxes.forEach(cb => {
+                    if (cb.checked) selected.push(cb.value);
+                });
+                if (selected.length === 0) {
+                    alert('请至少选择一个商品');
+                    e.preventDefault();
+                    return;
+                }
+                document.getElementById('selected-ids-input').value = selected.join(',');
+                // 表单正常提交
+            });
+        }
+
+        // 初始化总价
+        updateSelectedTotal();
+    });
+</script>
+{% endblock %}

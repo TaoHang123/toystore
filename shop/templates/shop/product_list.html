@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}商品列表 - 玩具经销商{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 商品网格专属样式 */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 30px;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-img {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #adb5bd;
+        font-size: 0.9rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .product-info {
+        padding: 20px;
+    }
+
+    .product-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #1e2a3a;
+    }
+
+    .product-title a {
+        text-decoration: none;
+        color: inherit;
+        transition: color 0.2s;
+    }
+
+    .product-title a:hover {
+        color: #007bff;
+    }
+
+    .product-price {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #e67e22;
+        margin: 12px 0;
+    }
+
+    .product-meta {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 16px;
+        border-top: 1px solid #f0f0f0;
+        padding-top: 12px;
+    }
+
+    .btn-detail {
+        display: inline-block;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        padding: 8px 20px;
+        border-radius: 40px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: background-color 0.2s;
+        text-align: center;
+    }
+
+    .btn-detail:hover {
+        background-color: #0056b3;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        color: #6c757d;
+        margin-bottom: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- 内部标题（可选，如果你觉得需要这个板块的话） -->
+    <div class="header">
+        <h1>🧸 玩具经销商</h1>
+        <p>为孩子们挑选最有趣的礼物</p>
+    </div>
+
+    {% if products %}
+        <div class="product-grid">
+            {% for product in products %}
+                <div class="product-card">
+                    <div class="product-img">
+                        🧩 商品图
+                    </div>
+                    <div class="product-info">
+                        <div class="product-title">
+                            <a href="{% url 'shop:product_detail' product.id %}">
+                                {{ product.prod_name }}
+                            </a>
+                        </div>
+                        <div class="product-price">
+                            ¥ {{ product.prod_price }}
+                        </div>
+                        <div class="product-meta">
+                            <p>供应商：<a href="{% url 'shop:vendor_detail' product.vendor.id %}">{{ product.vendor.vend_name }}</a></p>
+                            <p>所在地：{{ product.vendor.vend_city }}</p>
+                        </div>
+                        <a href="{% url 'shop:product_detail' product.id %}" class="btn-detail">
+                            查看详情 →
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <h3>✨ 暂无商品</h3>
+            <p>管理员请先登录后台添加玩具商品～</p>
+        </div>
+    {% endif %}
+{% endblock %}

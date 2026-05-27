@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.prod_name }} - 玩具经销商{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 商品详情页专属样式 */
+    .breadcrumb {
+        margin-bottom: 30px;
+        font-size: 0.9rem;
+    }
+    .breadcrumb a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    .product-detail {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        padding: 30px;
+    }
+
+    .product-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1e2a3a;
+        margin-bottom: 16px;
+    }
+
+    .product-price {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #e67e22;
+        margin-bottom: 20px;
+    }
+
+    .product-meta {
+        background: #f0f2f5;
+        padding: 16px 20px;
+        border-radius: 16px;
+        margin: 20px 0;
+        font-size: 0.95rem;
+        color: #2c3e50;
+    }
+
+    .product-meta p {
+        margin: 6px 0;
+    }
+
+    .product-detail-text {
+        margin: 30px 0;
+        border-top: 1px solid #e9ecef;
+        padding-top: 25px;
+    }
+
+    .product-detail-text h3 {
+        font-size: 1.4rem;
+        margin-bottom: 15px;
+        color: #2c3e50;
+    }
+
+    .product-detail-text p {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: #495057;
+        white-space: pre-line;
+    }
+
+    .btn-back {
+        display: inline-block;
+        background-color: #6c757d;
+        color: white;
+        text-decoration: none;
+        padding: 10px 24px;
+        border-radius: 40px;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        margin-top: 20px;
+    }
+
+    .btn-back:hover {
+        background-color: #5a6268;
+    }
+
+    @media (max-width: 640px) {
+        .product-detail {
+            padding: 20px;
+        }
+        .product-title {
+            font-size: 1.6rem;
+        }
+        .product-price {
+            font-size: 1.6rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- 面包屑导航 -->
+    <div class="breadcrumb">
+        <a href="{% url 'shop:index' %}">首页</a> / 
+        <span>{{ product.prod_name }}</span>
+    </div>
+
+    <div class="product-detail">
+        <h1 class="product-title">{{ product.prod_name }}</h1>
+        <div class="product-price">¥ {{ product.prod_price }}</div>
+
+        <div class="product-meta">
+            <p>🏢 供应商：<a href="{% url 'shop:vendor_detail' product.vendor.id %}">{{ product.vendor.vend_name }}</a></p>
+            <p>📍 所在地：{{ product.vendor.vend_city }}</p>
+        </div>
+
+        <div class="product-detail-text">
+            <h3>📖 商品简介</h3>
+            <p>{{ product.prod_detail|default:"暂无简介，请联系供应商获取详情。" }}</p>
+        </div>
+        <h3>立即购买</h3>
+        <form method="post">
+            {% csrf_token %}
+            <label for="quantity">数量：</label>
+            <input type="number" name="quantity" id="quantity" value="1" min="1" style="width: 80px;">
+            <button type="submit" formaction="{% url 'shop:buy_now' product.id %}">立即购买</button>
+            <button type="submit" formaction="{% url 'shop:add_to_cart' product.id %}">🛒 加入购物车</button>
+        </form>
+        <!-- 返回列表按钮 -->
+        <a href="{% url 'shop:index' %}" class="btn-back">← 返回商品列表</a>
+    </div>
+</div>
+{% endblock %}

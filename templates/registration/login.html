@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户登录 - 玩具经销商</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            max-width: 420px;
+            width: 100%;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.15);
+            padding: 32px 28px;
+        }
+        .login-card h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .sub {
+            text-align: center;
+            color: #6c757d;
+            margin-bottom: 28px;
+            font-size: 0.9rem;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #1e2a3a;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 1rem;
+            border: 1px solid #ced4da;
+            border-radius: 16px;
+            transition: 0.2s;
+            outline: none;
+        }
+        .form-group input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.2);
+        }
+        .errorlist {
+            color: #dc3545;
+            font-size: 0.8rem;
+            list-style: none;
+            margin-top: 4px;
+        }
+        button {
+            width: 100%;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 8px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .register-link {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.9rem;
+        }
+        .register-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="login-card">
+    <h2>🔐 登录</h2>
+    <div class="sub">欢迎回来，请登录您的账号</div>
+
+    <form method="post">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="errorlist">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="id_username">用户名</label>
+            <input type="text" name="username" id="id_username" required autofocus>
+        </div>
+
+        <div class="form-group">
+            <label for="id_password">密码</label>
+            <input type="password" name="password" id="id_password" required>
+        </div>
+
+        <button type="submit">登 录</button>
+    </form>
+
+    <div class="register-link">
+        还没有账号？<a href="{% url 'register' %}">立即注册</a>
+    </div>
+</div>
+</body>
+</html>

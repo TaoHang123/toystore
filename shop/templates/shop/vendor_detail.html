@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ vendor.vend_name }} - 供应商主页{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 供应商信息卡片 */
+    .vendor-card {
+        background: white;
+        border-radius: 24px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .vendor-name {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 12px;
+    }
+    .vendor-meta {
+        color: #6c757d;
+        margin-bottom: 20px;
+        border-left: 4px solid #007bff;
+        padding-left: 16px;
+    }
+    .vendor-intro {
+        background: #f0f2f5;
+        padding: 16px 20px;
+        border-radius: 16px;
+        margin-top: 20px;
+        line-height: 1.6;
+    }
+    /* 商品网格 */
+    .section-title {
+        font-size: 1.6rem;
+        margin: 30px 0 20px;
+        color: #1e2a3a;
+    }
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 24px;
+    }
+    .product-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
+    }
+    .product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .product-info {
+        padding: 16px;
+    }
+    .product-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    .product-name a {
+        text-decoration: none;
+        color: #1e2a3a;
+    }
+    .product-name a:hover {
+        color: #007bff;
+    }
+    .product-price {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #e67e22;
+        margin: 8px 0;
+    }
+    .btn-back {
+        display: inline-block;
+        margin-top: 30px;
+        color: #007bff;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- 供应商信息 -->
+    <div class="vendor-card">
+        <div class="vendor-name">{{ vendor.vend_name }}</div>
+        <div class="vendor-meta">
+            <p>📍 地址：{{ vendor.vend_address }}，{{ vendor.vend_city }}</p>
+        </div>
+        {% if vendor.intro %}
+        <div class="vendor-intro">
+            {{ vendor.intro|linebreaks }}
+        </div>
+        {% else %}
+        <div class="vendor-intro" style="color:#6c757d;">
+            暂无简介，欢迎直接联系商家咨询。
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 商品列表 -->
+    <h2 class="section-title">📦 旗下商品</h2>
+    {% if products %}
+        <div class="product-grid">
+            {% for product in products %}
+                <div class="product-card">
+                    <div class="product-info">
+                        <div class="product-name">
+                            <a href="{% url 'shop:product_detail' product.id %}">
+                                {{ product.prod_name }}
+                            </a>
+                        </div>
+                        <div class="product-price">¥ {{ product.prod_price }}</div>
+                        <div style="font-size:0.8rem; color:#6c757d;">
+                            库存：{{ product.stock|default:"请咨询" }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>该商家暂时没有上架商品。</p>
+    {% endif %}
+
+    <a href="{% url 'shop:index' %}" class="btn-back">← 返回商品列表</a>
+</div>
+{% endblock %}

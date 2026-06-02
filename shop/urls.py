@@ -18,4 +18,9 @@ urlpatterns = [
     path('checkout-preview/', views.checkout_preview, name='checkout_preview'),
     path('confirm-order/', views.confirm_order, name='confirm_order'),
     path('create-order/', views.create_order, name='create_order'),    
+    path('addresses/', views.address_list, name='address_list'),
+    path('address/add/', views.address_edit, name='address_add'),
+    path('address/<int:pk>/edit/', views.address_edit, name='address_edit'),
+    path('address/<int:pk>/delete/', views.address_delete, name='address_delete'),
+    path('address/<int:pk>/set-default/', views.address_set_default, name='address_set_default'),
 ]

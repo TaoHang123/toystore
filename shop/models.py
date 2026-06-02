@@ -56,6 +56,8 @@ class Orders(models.Model):
     total_amount= models.DecimalField(max_digits=10, decimal_places=2, default=0)
     def __str__(self):
         return f"Orders {self.id} by {self.customer.user.username}"
+    address = models.ForeignKey('Addresses', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="收货地址")
+
 
 class OrderItems(models.Model):
     order = models.ForeignKey(Orders, on_delete = models.CASCADE)

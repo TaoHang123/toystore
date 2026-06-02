@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{% if address %}编辑地址{% else %}新增地址{% endif %}</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">保存</button>
+    <a href="{% url 'shop:address_list' %}">取消</a>
+</form>
+{% endblock %}

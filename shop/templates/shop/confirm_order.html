@@ -3,7 +3,26 @@
 {% block title %}确认订单{% endblock %}
 
 {% block content %}
+<form action="{% url 'shop:create_order' %}" method="post">
 <h1>确认订单</h1>
+<hr>
+<h3>收货地址</h3>
+{% if addresses %}
+    <div class="address-list">
+        {% for addr in addresses %}
+            <div class="address-item">
+                <input type="radio" name="address_id" value="{{ addr.id }}" id="addr_{{ addr.id }}" {% if addr.is_default %}checked{% endif %}>
+                <label for="addr_{{ addr.id }}">
+                    {{ addr.receiver }}，{{ addr.phone }}，{{ addr.province }}{{ addr.city }}{{ addr.district }}{{ addr.detail }}
+                    {% if addr.is_default %}<span class="badge">默认</span>{% endif %}
+                </label>
+            </div>
+        {% endfor %}
+    </div>
+    <a href="{% url 'shop:address_list' %}">管理地址</a>
+{% else %}
+    <p>您还没有收货地址，请先<a href="{% url 'shop:address_add' %}">添加地址</a>。</p>
+{% endif %}
 <table class="table">
     <thead>
         <tr><th>商品</th><th>单价</th><th>数量</th><th>小计</th></tr>
@@ -20,7 +39,6 @@
     </tbody>
 </table>
 <p>总计：¥ {{ total|floatformat:2 }}</p>
-<form action="{% url 'shop:create_order' %}" method="post">
     {% csrf_token %}
     <button type="submit">提交订单</button>
 </form>

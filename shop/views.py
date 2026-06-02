@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404, HttpResponse
-from .models import Vendors, Products, Customers, Orders, OrderItems, CartItem
+from .models import Vendors, Products, Customers, Orders, OrderItems, CartItem, Addresses
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
@@ -8,6 +8,8 @@ from django.db import transaction
 from django.urls import reverse
 from django.db.models import Prefetch
 from django.views.decorators.http import require_POST
+from .forms import AddressForm
+
 
 def index(request):
     products = Products.objects.select_related('vendor').all()
@@ -161,9 +163,11 @@ def confirm_order(request):
     total = request.session.get('checkout_total')
     if not items:
         return redirect('shop:product_list')
+    addresses = request.user.customers.addresses.all()
     return render(request, 'shop/confirm_order.html', {
         'items': items,
         'total': total,
+        'addresses': addresses,
     })
 
 @login_required
@@ -189,7 +193,11 @@ def create_order(request):
             # 如果有库存字段，可检查
             # if product.stock < item['quantity']: ...
         total = 0
-        order = Orders.objects.create(customer=customer, status='pending', total_amount=0)
+        address_id = request.POST.get('address_id')
+        address = None
+        if address_id:
+            address = get_object_or_404(Addresses, pk=address_id, customer=customer)
+        order = Orders.objects.create(customer=customer, status='pending', total_amount=0, address=address)
         for item in items_data:
             product = products_dict[item['product_id']]
             quantity = item['quantity']
@@ -213,4 +221,45 @@ def create_order(request):
     # 清除 session 中的总金额（可选）
     request.session.pop('checkout_total', None)
     return redirect('shop:order_detail', order_id=order.id)
+
+@login_required
+def address_list(request):
+    addresses = request.user.customers.addresses.all()
+    return render(request, 'shop/address_list.html', {'addresses': addresses})
+
+@login_required
+def address_edit(request, pk=None):
+    customer = request.user.customers
+    if pk:
+        address = get_object_or_404(Addresses, pk=pk, customer=customer)
+    else:
+        address = None
+    if request.method == 'POST':
+        form = AddressForm(request.POST, instance=address)
+        if form.is_valid():
+            new_address = form.save(commit=False)
+            new_address.customer = customer
+            new_address.save()
+            # 如果勾选了“设为默认”，则取消其他地址的默认状态
+            if new_address.is_default:
+                customer.addresses.exclude(pk=new_address.pk).update(is_default=False)
+            return redirect('shop:address_list')
+    else:
+        form = AddressForm(instance=address)
+    return render(request, 'shop/address_form.html', {'form': form, 'address': address})
+
+@login_required
+def address_delete(request, pk):
+    address = get_object_or_404(Addresses, pk=pk, customer=request.user.customers)
+    address.delete()
+    return redirect('shop:address_list')
+
+@login_required
+def address_set_default(request, pk):
+    customer = request.user.customers
+    address = get_object_or_404(Addresses, pk=pk, customer=customer)
+    customer.addresses.update(is_default=False)
+    address.is_default = True
+    address.save()
+    return redirect('shop:address_list')
 # Create your views here.

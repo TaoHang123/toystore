@@ -41,6 +41,7 @@ class Products(models.Model):
     prod_detail = models.TextField(blank=True, null=True, verbose_name="商品简介")
     def __str__(self):
         return self.prod_name
+    stock = models.PositiveIntegerField(default=0, verbose_name="库存数量")
 
 class Orders(models.Model):
     customer = models.ForeignKey(Customers,on_delete=models.PROTECT)

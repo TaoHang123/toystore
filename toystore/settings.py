@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,13 +22,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-(m78$yii*k%t=lc1a0o!0dx9486s4sp(ep4_^8%i)=l85nq6r!"
+load_dotenv()  # 加载 .env 文件
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DEBUG') == 'True'
 
-ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -77,11 +80,11 @@ WSGI_APPLICATION = "toystore.wsgi.application"
 DATABASES = {
     "default": {
         'ENGINE': 'mysql.connector.django',
-        'NAME': 'shop',               # 你创建的数据库名
-        'USER': 'root',                 # 查到的用户名
-        'PASSWORD': '135xadth@$$@',          # 该用户的密码
-        'HOST': '127.0.0.1',            # 如果本地，填 localhost 或 127.0.0.1
-        'PORT': '3306',                 # MySQL 默认端口
+        'NAME': os.getenv('DB_NAME'),              # 你创建的数据库名
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),       # 该用户的密码
+        'HOST': os.getenv('DB_HOST'),           # 如果本地，填 localhost 或 127.0.0.1
+        'PORT': os.getenv('DB_PORT'),               # MySQL 默认端口
     }
 }
 

@@ -9,6 +9,8 @@ from django.urls import reverse
 from django.db.models import Prefetch
 from django.views.decorators.http import require_POST
 from .forms import AddressForm
+from django.contrib import messages
+
 
 
 def index(request):
@@ -179,40 +181,59 @@ def create_order(request):
         return redirect('shop:product_list')
     customer = request.user.customers
     with transaction.atomic():
-        # 获取所有商品 id 列表
-        product_ids = [item['product_id'] for item in items_data]
-        # 锁定商品行，防止并发修改
-        products = Products.objects.select_for_update().filter(id__in=product_ids)
+        # 获取所有商品 id 列表，并排序避免死锁
+        product_ids = sorted([item['product_id'] for item in items_data])
+        # 锁定商品行
+        products = Products.objects.select_for_update().filter(id__in=product_ids).order_by('id')
         products_dict = {p.id: p for p in products}
-        # 检查所有商品都存在且库存充足（如果有库存字段）
+
+        # ① 检查所有商品是否存在，库存是否充足
         for item in items_data:
             product = products_dict.get(item['product_id'])
             if not product:
-                # 商品不存在，返回错误页面或提示
-                return redirect('shop:cart_detail')  # 简易处理
-            # 如果有库存字段，可检查
-            # if product.stock < item['quantity']: ...
-        total = 0
+                messages.error(request, f"商品 {item.get('name', '未知')} 不存在，请重新选择。")
+                return redirect('shop:cart_detail')
+            if product.stock < item['quantity']:
+                messages.error(request, f"商品「{product.prod_name}」库存不足（剩余 {product.stock} 件），请调整数量。")
+                return redirect('shop:cart_detail')
+
+        # ② 创建订单（地址可选）
         address_id = request.POST.get('address_id')
         address = None
         if address_id:
             address = get_object_or_404(Addresses, pk=address_id, customer=customer)
-        order = Orders.objects.create(customer=customer, status='pending', total_amount=0, address=address)
+
+        order = Orders.objects.create(
+            customer=customer,
+            status='pending',
+            total_amount=0,
+            address=address
+        )
+
+        total = 0
+        # ③ 创建订单明细并扣减库存
         for item in items_data:
             product = products_dict[item['product_id']]
             quantity = item['quantity']
-            price = product.prod_price  # 使用数据库最新价格（也可以使用 session 中的旧价格，看业务需求）
+            price = product.prod_price  # 使用数据库最新价格
+
+            # 扣减库存（已经在上面检查过，此处直接减）
+            product.stock -= quantity
+            product.save()
+
             subtotal = price * quantity
             total += subtotal
+
             OrderItems.objects.create(
                 order=order,
                 product=product,
                 quantity=quantity,
                 item_price=price,
             )
-            # 如果有库存扣减，在此执行：product.stock -= quantity; product.save()
+
         order.total_amount = total
         order.save()
+
         # 如果是购物车结算，删除对应的购物车项
         # 注意：需要知道哪些 cart_item_id 要删除
         cart_item_ids = [item.get('cart_item_id') for item in items_data if 'cart_item_id' in item]

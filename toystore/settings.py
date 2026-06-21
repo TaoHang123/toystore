@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import dj_database_url
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -78,14 +80,7 @@ WSGI_APPLICATION = "toystore.wsgi.application"
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        'ENGINE': 'mysql.connector.django',
-        'NAME': os.getenv('DB_NAME'),              # 你创建的数据库名
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),       # 该用户的密码
-        'HOST': os.getenv('DB_HOST'),           # 如果本地，填 localhost 或 127.0.0.1
-        'PORT': os.getenv('DB_PORT'),               # MySQL 默认端口
-    }
+    'default': dj_database_url.config(default='sqlite:///db.sqlite3')
 }
 
 LOGIN_REDIRECT_URL = '/shop/'

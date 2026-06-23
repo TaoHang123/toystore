@@ -68,6 +68,7 @@
             <a href="{% url 'shop:index' %}">🎁 玩具经销商</a>
         </div>
         <div class="user-info">
+            <a href="{% url 'shop:order_list' %}">📋 我的订单</a>
             <a href="{% url 'shop:address_list' %}">📖 地址簿</a>
             <a href="{% url 'shop:cart_detail' %}">🛒 购物车</a>
             {% if user.is_authenticated %}
